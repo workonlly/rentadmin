@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const ADMIN_NAME = process.env.NEXT_ADMIN_NAME ;
-const ADMIN_PASSWORD = process.env.NEXT_ADMIN_PASSWORD ;
+const ADMIN_NAME = process.env.NEXT_PUBLIC_ADMIN_NAME ;
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ;
 const AUTH_KEY = "rentadmin-authenticated";
 
 export default function Home() {
