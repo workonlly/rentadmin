@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+const AUTH_KEY = 'rentadmin-authenticated';
 
 type Post = {
   postid: string;
@@ -19,13 +21,30 @@ type Post = {
 };
 
 export default function Page() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingPostId, setSavingPostId] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    const authValue = window.localStorage.getItem(AUTH_KEY);
+
+    if (authValue !== 'true') {
+      router.replace('/');
+      return;
+    }
+
+    setIsAuthenticated(true);
+  }, [router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+
     const controller = new AbortController();
     const timeoutId = window.setTimeout(async () => {
       setLoading(true);
@@ -61,7 +80,7 @@ export default function Page() {
       controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [query]);
+  }, [query, isAuthenticated]);
 
   const raisedCount = useMemo(
     () => posts.filter((post) => Boolean(post.raise)).length,
@@ -95,6 +114,14 @@ export default function Page() {
       setSavingPostId(null);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 text-sm text-slate-600">
+        Checking authentication...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#eff6ff,_#f8fafc_40%,_#ffffff_100%)] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">

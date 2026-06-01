@@ -1,20 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+const ADMIN_NAME = process.env.NEXT_ADMIN_NAME ;
+const ADMIN_PASSWORD = process.env.NEXT_ADMIN_PASSWORD ;
+const AUTH_KEY = "rentadmin-authenticated";
 
 export default function Home() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // This is where you will send the name and password to your backend
-    // to verify their identity before showing them the data.
-    console.log("Attempting login with:", { name, password });
-    
-    // Example: alert("Login clicked!");
+
+    const isAuthenticated = name.trim() === ADMIN_NAME && password === ADMIN_PASSWORD;
+
+    if (!isAuthenticated) {
+      setError("Invalid name or password.");
+      return;
+    }
+
+    window.localStorage.setItem(AUTH_KEY, "true");
+    router.push("/main");
   };
 
   return (
@@ -30,6 +40,12 @@ export default function Home() {
           Welcome Back
         </h1>
 
+        {error ? (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : null}
+
         <form onSubmit={handleLogin} className="space-y-6">
           {/* Name Input */}
           <div>
@@ -40,7 +56,10 @@ export default function Home() {
               type="text"
               id="name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                setError(null);
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
               placeholder="Enter your name"
               required
@@ -56,7 +75,10 @@ export default function Home() {
               type="password"
               id="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-gray-900"
               placeholder="••••••••"
               required
